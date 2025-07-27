@@ -1,9 +1,6 @@
-%% 对不同类型的问题做实验
-%% 仅考虑有噪声的情况，这种情况下算法的表现效果较好，回退or外推？
 T = tucker_als(tensor(imageStack), 30);
-%%返回的T是包含G，U1，U2，U3的结构体，这里压缩篇的时候用的多少后面的秩就用多少
-m=20;   %每种方法运行20次
-%T=gas;  %gas本身的秩就是20
+m=20;   
+%T=gas;  
 T.U{1}=T.U{1}+randn(size(T.U{1}));
 T.U{2}=T.U{2}+randn(size(T.U{2}));
 T.U{3}=T.U{3}+randn(size(T.U{3}));
@@ -12,7 +9,6 @@ Y={T.U{1},T.U{2},T.U{3},double(T.core)};
 s=size(T);% size of problem
 %s=size(Y);
 R=10;
-% 算法的参数选取范围
 o1(m) = struct('f',[],'t',[]);
 o2(m) = struct('f',[],'t',[]);
 o3(m) = struct('f',[],'t',[]);
@@ -37,4 +33,4 @@ for i=1:m
     o3(i).t=out3.t;
 end
 
-%cave3截200:end多跑几次
+

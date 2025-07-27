@@ -1,12 +1,5 @@
-function X = kr(U,varargin) % Khatri-Rao product of two matrices A and B, 
-% of dimensions I-by-K and J-by-K resp. The result is an I*J-by-K matrix 
-% formed by the matching columnwise Kronecker products, 
-% i.e. the k-th col of the Khatri-Rao product is defined as
-%   kron(A(:,k),B(:,k)).
-%
-%   kr(A,B,C,...) and kr({A B C ...}) compute a string of Khatri-Rao 
-%   products A o B o C o ..., where o denotes the Khatri-Rao product.
-%   Version: 21/10/10 , Laurent Sorber (Laurent.Sorber@cs.kuleuven.be)
+function X = kr(U,varargin) 
+% Khatri-Rao product of two matrices A and B
 if ~iscell(U), U = [U varargin]; end
 
 K = size(U{1},2);
@@ -22,4 +15,4 @@ for n = length(U)-1:-1:1
     J = I*J;
 end
 X = reshape(X,[size(X,1) K]);
-end %EOF
+end 

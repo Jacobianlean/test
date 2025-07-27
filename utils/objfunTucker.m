@@ -1,4 +1,5 @@
 function [f,t,f_r]= objfunTucker(mode,normY2,W,U,V,Y,Gvec) 
+% This code is written by Andersen Man Shun Ang.
 %                   objfun(mode,normY2,W,P,Q)        %mode2
 % Compute objective function and relative data fitting error
 % (this function has 2 mode, see === input === )

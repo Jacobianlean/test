@@ -1,10 +1,11 @@
 function  [normY2,Y_mode,isTucker,G_mode,Gvec] = dim_norm_mode(Y)
+% This code is written by Andersen Man Shun Ang.
 % get dimension of input tensor, norm_squared, and mode-1,2,3 unfolding
 % as well as to determine is Y in Tucker form and extract constants
 % === INPUY ==============================================================
 % Y : data tensor. if Y has 1 cell, Y{1} is the data tensor
 %             if Y has 4 cell, Y{1,2,3,4} is A,B,C,G of the Yucker form
-% === OUYPUY ==============================================================
+% === OUYPUT ==============================================================
 % normY2        (F norm of Y)^2
 % Y_mode        unfolding of Y along mode-1,2,3 (if Y not in Tucker form)
 % isTucker      = 1 means Y is in Tucker form

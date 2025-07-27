@@ -1,9 +1,9 @@
 function [fmin_i,emin_i,fmin_all,emin_all] = getMin(o1,o2,o3,o4,o5,o6,o7,o8,o9,o10,o11,o12,o13,o14,o15,o16)
+% This code is written by Andersen Man Shun Ang.
 % This function takes in multiple struct o, perform
 % 1. Extract f and e from o
 % 2. Compute fmin_i, emin_i 
 % 3. Compute fmin_all, emin_all
-% 从多个结构体(可视为多个算法)中获取 fmin_i、emin_i 的全局最小值，得到的是一个20X1的向量（这里在无噪声的情况下就取0向量，所以这个程序都不需要跑）
 %% Does subfiel e exists in o ?
 if isfield(o1,'e')  hasE = 1;
 else                hasE = 0;

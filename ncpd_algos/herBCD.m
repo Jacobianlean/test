@@ -33,9 +33,6 @@ function [U,V,W,out] = herBCD(Y,r,opt)
 %                  same for Vstore, Wstore
 %  .beta,betamax : beta, betamax in each iteration
 % Note. Computation of factor fitting error is done outside this function
-% === Credits ==================== A.Ang @ UMONS,BE, angms.science ========               
-% 8/7/2019 First version                  A.Ang
-% 25/9/2019 Last update                   A.Ang 
 %% Time
 time_start = tic; % Mark the time flag of the start of the whole code
 time_f     = 0;   % Hold the total amount of time on computing f (note the time on computing f_hat is included)
@@ -57,22 +54,12 @@ if (nargin < 3) opt = []; end
  f_hat = f; % allocate space for the restart criterion (*~*)
  % *** This algo uses restarts 
  
-% algorithm solver
-if isfield(opt,'algoName') 
-    algoName = opt.algoName;
-    if strcmp(algoName,'ADMM') 
-        UtU=U'*U; VtV=V'*V; WtW=W'*W; Utild=U; Vtild=V; Wtild=W;
-    end
-else
-    algoName = 'AHALS'; % default
-end
- 
+
 t0 = toc(time_start) - time_f; % all the initialization time
 if (t0>=timemax) error('Initialization run longer then max runtime, set opt.timemax bigger'); end
 t_now = t0;
 %% Main Loop
 i = 1; % iteration counter for the main loop
-inner_delta = 1e-2; % inner loop early stopping critetion
 Uhat = U; Vhat = V; What = W;  % HER pairing variables
 while i <= itermax && t_now < timemax
     %{
@@ -105,14 +92,10 @@ while i <= itermax && t_now < timemax
      elseif isTucker == 1
         Pu = Y{1}*(G_mode{1}*kr(Y{2}'*Vhat,Y{3}'*What)); % 1 smaller MTTKRP
      end
-     U_old = U;  %都是上一步迭代完成的结果
+     U_old = U;  
      % Perform the block update
-     if strcmp(algoName,'ADMM')
-       [U,Utild,UtU] = nnlsadmm(Pu',U,Utild,Qu,UtU,inneritermax,inner_delta); 
-     else
-        U = BCD_blkUpdt( U, Qu, Pu, inneritermax, inner_delta, algoName ); 
-        %U=PALS(U,Qu,Pu,0.01); %lambda=0.01
-     end
+     U = BCD_blkUpdt( U, Qu, Pu, inneritermax); 
+     
      Uhat = U + beta*(U-U_old); % Extrapolation  
     if projMode(1) == 1  Uhat = max(0,Uhat); end % Projection 
     %% *** On V ***
@@ -125,12 +108,8 @@ while i <= itermax && t_now < timemax
      end
      V_old = V;
      % Perform the block update
-     if strcmp(algoName,'ADMM')
-       [V,Vtild,VtV] = nnlsadmm(Pv',V,Vtild,Qv,VtV,inneritermax,inner_delta);
-     else
-        V = BCD_blkUpdt( V, Qv, Pv, inneritermax, inner_delta, algoName ); 
-        %V=PALS(V,Qv,Pv,0.01);
-     end
+     V = BCD_blkUpdt( V, Qv, Pv, inneritermax); 
+     
      Vhat = V + beta*(V - V_old); % exttrapolation
     if projMode(2) == 1  Vhat = max(0,Vhat);  end % Projection 
     %% *** On W ***
@@ -143,17 +122,13 @@ while i <= itermax && t_now < timemax
      end
      W_old = W;
      % Perform the block update
-     if strcmp(algoName,'ADMM')
-       [W,Wtild,WtW] = nnlsadmm(Pw',W,Wtild,Qw,WtW,inneritermax,inner_delta);
-     else
-        W = BCD_blkUpdt( W, Qw, Pw, inneritermax, inner_delta, algoName ); 
-        %W=PALS(W,Qw,Pw,0.01);
-     end
-     What = W + beta*(W - W_old); % exttrapolation
+     W = BCD_blkUpdt( W, Qw, Pw, inneritermax); 
+     
+     What = W + beta*(W - W_old); % extrapolation
     if projMode(3) == 1  What = max(0,What);  end % Projection 
     %% Error computations and restart ***
     if isTucker == 0
-     f_hat(i)    = objfun(2,normY2,W,Pw,Qw); % f_hat, time included   %从两个不同模态做计算error
+     f_hat(i)    = objfun(2,normY2,W,Pw,Qw); % f_hat, time included   
      [f(i), t_f] = objfun(1,normY2,W,U,V,Y_mode{3}); % f, time to be reduced   
     elseif isTucker == 1
      f_hat(i)    = objfunTucker(2,normY2,W,Pw,Qw); % f_hat, time included
@@ -164,8 +139,8 @@ while i <= itermax && t_now < timemax
     a2=norm(Vhat-V_old)/norm(Vhat);
     a3=norm(What-W_old)/norm(What);
     
-    %% 增加停机准则判断（这里如果不想比较收敛速率的话可以不要）
-    if i>1&&max([abs(f(end)-f(end-1))/f(end),a1,a2,a3])<epsilon&&t_now>0.08 %可以重新设定为一个参数
+    %% stopping criteria
+    if i>1&&max([abs(f(end)-f(end-1))/f(end),a1,a2,a3])<epsilon&&t_now>0.08 
         break;
     end
     

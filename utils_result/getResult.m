@@ -1,6 +1,5 @@
 function o2 = getResult(o, fmin_i, emin_i, timemax, mMode)
 % This function takes in a o struct, fmin_i, emin_i, timemax, mMode
-% 将截断后或更新后的数据进行基准化(即减去 f 最小值 fmin_i、e 最小值 emin_i)，并根据时间或迭代进行插值，从而得到一致采样点下的 f、e。
 % mMode   : mean = 0, default median = 1
 % It extract  f, e, fmin, emin, t, and output a new o struct with sub-fields
 %   f          f(iteration) - fmin
@@ -76,12 +75,11 @@ if hasE == 1
     o2.e_t     = et;
     o2.me_t    = me_t;
 end
-end %EOF
+end 
 
-%% call liner iterpolation
+%% call liner iterpolation (Code written by Andersen Man Shun Ang)
 %{
 function [F,T] = multiLinInterp(f,t,timemax)
-%文章的处理方式
 N = min(size(f));
 if N ~= min(size(t)) || max(size(f)) ~= max(size(t))
  error('Inputs need to have same sizes'); 
@@ -107,7 +105,7 @@ f =[f(1) f];
 t =[0    t];
 
 if Tmax <= 2
-  stepsize = 0.001;   %调整这个使得画图能够显示出来时间的变化曲线
+  stepsize = 0.001;   
 else
   stepsize = 0.5;
 end
@@ -128,16 +126,14 @@ end
 end
 %}
 
+%% Our version
 function [F, T] = linInterp(f, t, Tmax, fixed_time_points)
-% 确保行向量 - 但需要处理多列情况
 f = f(:)';
 t = t(:)';
 
-% 添加初始点(0, f(1))
 f = [f(1), f];
 t = [0, t];
 
-% 确定插值时间点
 if nargin < 4
     stepsize = 0.001;
     T = 0:stepsize:Tmax;
@@ -145,41 +141,30 @@ else
     T = fixed_time_points;
 end
 
-% 提前找到最后一个有效时间点
 last_valid_time = min(max(t), Tmax);
 last_valid_idx = find(t <= last_valid_time, 1, 'last');
 
-% 初始化结果向量
-F = nan(size(T)); % 使用 nan 初始化可以避免维度问题
+F = nan(size(T)); 
 
-% 确保所有值都是标量
 for k = 1 : length(T)
     tk = T(k);
     
-    % 处理超出原始时间范围的情况
     if tk > t(last_valid_idx)
         F(k) = f(last_valid_idx);
         continue;
     end
     
-    % 查找包含时间点的区间
-    ilow = max(1, sum(t <= tk)); % 确保至少为1
-    ihig = min(length(t), find(t >= tk, 1)); % 确保不超出范围
+    ilow = max(1, sum(t <= tk)); 
+    ihig = min(length(t), find(t >= tk, 1)); 
     
-    % 边界情况处理
     if ilow == ihig
-        % 如果恰好处于一个点上
         F(k) = f(ilow);
     else
-        % 确保索引有效
         if ilow >= 1 && ilow <= length(f) && ihig >= 1 && ihig <= length(f)
-            % 计算权重并确保结果是标量
             weight = (tk - t(ilow)) / (t(ihig) - t(ilow));
             
-            % 标量计算确保维度匹配
             F(k) = (1 - weight) * f(ilow) + weight * f(ihig);
         else
-            % 如果索引超出范围，使用最近的有效值
             F(k) = f(min(max(1, ilow), length(f)));
         end
     end
@@ -187,18 +172,15 @@ end
 end
 
 function [F, T] = multiLinInterp(f, t, timemax)
-% 修改后：处理多维输入，确保每行独立处理
-N = size(f, 1); % 试验次数
+N = size(f, 1); 
 stepsize = 0.1;
 T = 0:stepsize:timemax;
-F = nan(N, length(T)); % 使用 nan 初始化的矩阵
+F = nan(N, length(T)); 
 
 for i = 1 : N
-    % 确保处理单个试验的数据
     f_trial = f(i, :);
     t_trial = t(i, :);
     
-    % 去除 NaN 值
     valid_f = ~isnan(f_trial);
     valid_t = ~isnan(t_trial);
     valid_indices = valid_f & valid_t;
@@ -206,18 +188,14 @@ for i = 1 : N
     f_trial = f_trial(valid_indices);
     t_trial = t_trial(valid_indices);
     
-    % 确保时间序列单调递增
     if any(diff(t_trial) <= 0)
-        % 如果时间序列不单调，排序并去重
         [t_trial, sort_idx] = unique(t_trial, 'sorted');
         f_trial = f_trial(sort_idx);
     end
     
-    % 如果试验数据有效才进行插值
     if ~isempty(f_trial) && ~isempty(t_trial)
         [F(i, :), ~] = linInterp(f_trial, t_trial, timemax, T);
     else
-        % 如果数据无效，使用NaN填充
         F(i, :) = nan(1, length(T));
     end
 end

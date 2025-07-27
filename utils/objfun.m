@@ -1,4 +1,5 @@
 function [f,t,f_r]= objfun(mode,normY2,W,U,V,Ymode3) %mode1
+% This code is written by Andersen Man Shun Ang.
 %                   objfun(mode,normY2,W,P,Q)        %mode2
 % Compute objective function and relative data fitting error
 % (this function has 2 mode, see input)
@@ -64,58 +65,3 @@ t_start = tic;
 t = toc(t_start);       
 end
 end
-%% Experiments
-%{
-dims = [150,1000,50]; % big tensor to see the effect between f2 f3
-r = 10;
-sigma = 0;
-
-[Utrue,Vtrue,Wtrue] = randGen(dims,r);  % Generate ground truth factors
-Y = CreateTensor(dims,Utrue,Vtrue,Wtrue,sigma); % Create data tensor
-[U V W] = randGen(dims,r);  
-normY2 = Y(:)'*Y(:);          % Norm_sqaured of tensor Y
-Y_mode = unfold3mode(Y,dims); % mode-1,2,3 unfoldings of tensor Y
-
-for k = 1 : 100
- t_f1  = tic; % timer flag
- f1(k)  = 0.5*norm(Y_mode{1} - U*kr(V,W)','fro')^2; % compute initial f
- t1(k) = toc(t_f1);  % record the time, add this time to time_e
-k
-end
-
-for k = 1 : 100
- t_f2  = tic; % timer flag
- Q  =  (U'*U).*(V'*V); % Tensor short cut for computing A'*A for W
- P  =  Y_mode{3}*kr(U,V); % costly
- f2(k)  = 0.5*(normY2 - 2*trace(W'*P) + trace(W*Q*W') );
- t2(k) = toc(t_f2);  % record the time, add this time to time_e
-k
-end
-
-for k = 1 : 100
- t_f3  = tic; % timer flag
- Q  =  (U'*U).*(V'*V); % Tensor short cut for computing A'*A for W
- P  =  Y_mode{3}*kr(U,V); % costly
- f3(k)  = 0.5*(normY2 - 2*trace(W'*P) + sum(sum( (W'*W) .* Q )));
- t3(k) = toc(t_f3);  % record the time, add this time to time_e
-k
-end
-
-
-for k = 1 : 100
- t_f4  = tic; % timer flag
- Q  =  (U'*U).*(V'*V); % Tensor short cut for computing A'*A for W
- P  =  Y_mode{3}*kr(U,V); % costly
- f4(k)  = 0.5*(normY2 - 2*W(:)'*P(:) + sum(sum( (W'*W) .* Q )));
- t4(k) = toc(t_f4);  % record the time, add this time to time_e
-k
-end
-
-subplot(211),
-plot(f1-f2),hold on, plot(f1-f3),hold on, plot(f1-f4) % should be all zero
-subplot(212),
-plot(t1,'k'),hold on,
-plot(t2,'b'),hold on, % t2 should be much lower than t
-plot(t3,'g'),hold on
-plot(t4,'r'),hold on
-%}

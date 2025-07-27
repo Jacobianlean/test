@@ -1,4 +1,5 @@
 function [T,T3] = tensorForm(dims,U,V,W,G)
+% This code is written by Andersen Man Shun Ang.
 % Create order 3 tensor from given U,V,W,G as 
 % T = (U*V*W)G
 % === Inputs ==============================================================

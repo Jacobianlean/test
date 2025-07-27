@@ -3,11 +3,10 @@ function [e_mean e_all] = computeE(Us,Vs,Ws,Uref,Vref,Wref)
 % This code only work order 3 tensor 
 % === INPUTS ==============================================================
 % Us,Vs,Ws           mode-1,mode-2,mode-3 matrices 
-%                    note Us is I x r x numM
-% Uref, Vref, Wref   reference for mode-1,mode-2,mode-3 matrices
+% Uref, Vref, Wref   real mode-1,mode-2,mode-3 matrices
 % === OUTPUTS =============================================================
-% e_mean             a matrix [e_Ui e_Vi e_Wi] in i-th row
-% e_all              a vector, mean([e_Ui e_Vi e_Wi] in i-th element
+% e_all             a matrix [e_Ui e_Vi e_Wi] in i-th row
+% e_mean              a vector, mean([e_Ui e_Vi e_Wi] in i-th element
 %% Input check
 numU = size(Us,3); % number of slice in U
 numV = size(Vs,3); % number of slice in V
@@ -27,8 +26,6 @@ end
 
 function  err = errc(A_hat,A)
 % Correction of sign and permutation ambiguity of CP model.
-% Inputs: A_hat,...   : estimated factors without correction;
-%         A,...       : true factors
 % External functions: munkres.m  (Hungarian algorithm)
 %------------------------------Normalization------------------------------%
 A_hat = col_norm(A_hat);

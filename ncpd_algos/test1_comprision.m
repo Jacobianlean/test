@@ -1,30 +1,28 @@
-%% 对不同类型的问题做实验
-%% 仅考虑有噪声的情况，这种情况下算法的表现效果较好，回退or外推？
-n=2; %4类问题
-K=8;  %每类问题生成8个随机张量
-m=25;   %25种方法对比
-P=10;   %每次随机选取初始点算20次 
+%% test for synthetic data
+
+n=8; %6 classes of problems
+K=20;  %number of instances for every class
+m=20;   %number of algorithms
+P=20;   %number of repetation of every algorithm for each instance
 tautimes=zeros([m,n*K]);
 steps=zeros([m,n*K]);
-results=zeros([m,n*K]);  %目标函数最优值
-% 考虑四类问题：秩的多少，有无噪声
-c=[0.001,0.001]; %相关性
-s=[120 120 100];% size of problem
-R=[35,35];
+results=zeros([m,n*K]);  
+c=[0.001,0.001]; 
+s=[120 120 100];
+R=[35,35]; 
 l1=[0,1];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 l2=l1;
 
-% 算法的参数选取范围
 stepmethodset={'HA','HFA','HFB'};
 modifyset={'N','R','E'};
 projchooseset={'BF','AF'};
 
 
-for j=1:n %n类问题
+for j=1:n 
     for k=1:K
-        %生成问题
+        %generate random tensors
         %Seed = (j-1)*K+k; 
-        [X,~]=test_CreateTensor_diff(s,c(j),R(j),l1(j),l2(j));  %不定随机种子
+        [X,~]=test_CreateTensor_diff(s,c(j),R(j),l1(j),l2(j));  
         X=double(X);
         %X=randn(s);
         step=cell([m,1]);tautime=cell([m,1]);result=cell([m,1]);
@@ -71,8 +69,3 @@ for typestep=1:3
     end    
 end
 
-%{
- 从结果看，AHALS对于秩比较高的情况计算结果较差，试一下proximal ALS
-该 BCD_blkUpdt( V, Qv, Pv, inneritermax, inner_delta, algoName );
-用 proximal ALS计算
-%}

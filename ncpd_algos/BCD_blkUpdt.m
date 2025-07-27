@@ -1,11 +1,10 @@
 function A = BCD_blkUpdt( A, Q, P, itermax)
+% This code is written by Andersen Man Shun Ang.
 % Perform a block update on block A for BCD and herBCD
 % === INPATS ==============================================================
 % A        : the block variable 
 % Q,P      : coefficients used for updating A
 % itermax  : max number of iterarion for this block update
-% delta    : stopping criteria for this block update
-% algoName : the name of algo used to update A
 % === OUTPUTS =============================================================
 % A
 A  = nnlsHALSupdt_jec(Q,P',A',itermax)';   

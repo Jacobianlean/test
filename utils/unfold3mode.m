@@ -1,4 +1,5 @@
 function [Y_mode, J] = unfold3mode(Y,dims)
+% This code is written by Andersen Man Shun Ang.
 % 3 different unfoldings of order-3 tensor Y
 if (nargin<2) dims = size(Y); end
 
